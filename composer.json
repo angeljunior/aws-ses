@@ -4,8 +4,8 @@
     "keywords": ["amazon", "email","aws","ses", "api", "rest"],
     "homepage": "https://github.com/angeljunior/aws-ses",
     "type": "library",
-    "license": "BSD",
-    "minimum-stability": "stable",
+    "license": "MIT",
+    "minimum-stability": "dev",
     "prefer-stable": true,
     "authors": [
         {
