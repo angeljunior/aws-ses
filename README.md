@@ -184,10 +184,3 @@ v.1.0.0.
 
  - Inital impport
 
-### Todo List
-
- - Fully document the class methods with phpdoc tags
- - Build documentation with phpDocumentor
- - Move examples to files
- - Make a [Composer](https://packagist.org/) package
- - Allow X-Headers usage
