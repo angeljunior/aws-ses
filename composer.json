@@ -1,0 +1,23 @@
+{
+    "name": "angeljunior/aws-ses",
+    "description": "Send emails via Amazon Simple Email Service (SES) with REST-like interface",
+    "keywords": ["amazon", "email","aws","ses", "api", "rest"],
+    "homepage": "https://github.com/angeljunior/aws-ses",
+    "type": "library",
+    "license": "BSD",
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "authors": [
+        {
+            "name": "Angel Junior",
+            "role": "developer"
+        }
+    ],
+    "autoload": {
+        "classmap": ["src/"]
+    },
+    "require": {
+        "php": ">=5.6.0",
+        "ext-curl": "*"
+    }
+}
