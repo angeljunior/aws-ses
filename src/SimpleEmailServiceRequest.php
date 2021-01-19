@@ -4,9 +4,9 @@
 *
 * @link https://github.com/angeljunior/aws-ses
 * @package AmazonSimpleEmailService
-* @version v1.0.0
+* @version v1.0.5
 */
-final class SimpleEmailServiceRequest
+class SimpleEmailServiceRequest
 {
 	private $ses, $verb, $parameters = array();
 
@@ -22,23 +22,38 @@ final class SimpleEmailServiceRequest
 	/**
 	* Constructor
 	*
-	* @param string $ses The SimpleEmailService object making this request
+	* @param SimpleEmailService $ses The SimpleEmailService object making this request
 	* @param string $verb HTTP verb
 	* @return void
 	*/
-	public function __construct($ses, $verb = 'GET') {
+	public function __construct(SimpleEmailService $ses = null, $verb = 'GET') {
 		$this->ses = $ses;
 		$this->verb = $verb;
 		$this->response = (object) array('body' => '', 'code' => 0, 'error' => false);
 	}
 
+
+	/**
+	* Set SES class
+	*
+	* @param SimpleEmailService $ses
+	* @return SimpleEmailServiceRequest $this
+	*/
+	public function setSES(SimpleEmailService $ses) {
+		$this->ses = $ses;
+
+		return $this;
+	}
+
 	/**
 	* Set HTTP method
 	*
+	* @param string $verb
 	* @return SimpleEmailServiceRequest $this
 	*/
 	public function setVerb($verb) {
 		$this->verb = $verb;
+
 		return $this;
 	}
 
@@ -63,7 +78,7 @@ final class SimpleEmailServiceRequest
 	}
 
 	/**
-	* Get the params for the reques
+	* Get the params for the request
 	*
 	* @return array $params
 	*/
@@ -130,17 +145,9 @@ final class SimpleEmailServiceRequest
 	*/
 	public function getResponse() {
 
-		// must be in format 'Sun, 06 Nov 1994 08:49:37 GMT'
-		$date = gmdate('D, d M Y H:i:s e');
-		$query = implode('&', $this->getParametersEncoded());
-		$auth = 'AWS3-HTTPS AWSAccessKeyId='.$this->ses->getAccessKey();
-		$auth .= ',Algorithm=HmacSHA256,Signature='.$this->__getSignature($date);
-		$url = 'https://'.$this->ses->getHost().'/';
-
-		$headers = array();
-		$headers[] = 'Date: ' . $date;
-		$headers[] = 'Host: ' . $this->ses->getHost();
-		$headers[] = 'X-Amzn-Authorization: ' . $auth;
+        $url = 'https://'.$this->ses->getHost().'/';
+        $query = implode('&', $this->getParametersEncoded());
+        $headers = $this->getHeaders($query);
 
 		$curl_handler = $this->getCurlHandler();
 		curl_setopt($curl_handler, CURLOPT_CUSTOMREQUEST, $this->verb);
@@ -203,6 +210,34 @@ final class SimpleEmailServiceRequest
 		return $response;
 	}
 
+    /**
+     * Get request headers
+     * @param string $query
+     * @return array
+     */
+	protected function getHeaders($query) {
+        $headers = array();
+
+	    if ($this->ses->getRequestSignatureVersion() == SimpleEmailService::REQUEST_SIGNATURE_V4) {
+            $date = (new DateTime('now', new DateTimeZone('UTC')))->format('Ymd\THis\Z');
+            $headers[] = 'X-Amz-Date: ' . $date;
+            $headers[] = 'Host: ' . $this->ses->getHost();
+            $headers[] = 'Authorization: ' . $this->__getAuthHeaderV4($date, $query);
+
+        } else {
+            // must be in format 'Sun, 06 Nov 1994 08:49:37 GMT'
+            $date = gmdate('D, d M Y H:i:s e');
+            $auth = 'AWS3-HTTPS AWSAccessKeyId='.$this->ses->getAccessKey();
+            $auth .= ',Algorithm=HmacSHA256,Signature='.$this->__getSignature($date);
+
+            $headers[] = 'Date: ' . $date;
+            $headers[] = 'Host: ' . $this->ses->getHost();
+            $headers[] = 'X-Amzn-Authorization: ' . $auth;
+        }
+
+        return $headers;
+    }
+
 	/**
 	* Destroy any leftover handlers
 	*/
@@ -244,11 +279,95 @@ final class SimpleEmailServiceRequest
 	/**
 	* Generate the auth string using Hmac-SHA256
 	*
-	* @internal Used by SimpleDBRequest::getResponse()
+	* @internal Used by SimpleEmailServiceRequest::getResponse()
 	* @param string $string String to sign
 	* @return string
 	*/
 	private function __getSignature($string) {
 		return base64_encode(hash_hmac('sha256', $string, $this->ses->getSecretKey(), true));
 	}
+
+	/**
+     * @param string $key
+     * @param string $dateStamp
+     * @param string $regionName
+     * @param string $serviceName
+     * @param string $algo
+     * @return string
+     */
+    private function __getSigningKey($key, $dateStamp, $regionName, $serviceName, $algo) {
+        $kDate = hash_hmac($algo, $dateStamp, 'AWS4' . $key, true);
+        $kRegion = hash_hmac($algo, $regionName, $kDate, true);
+        $kService = hash_hmac($algo, $serviceName, $kRegion, true);
+
+        return hash_hmac($algo,'aws4_request', $kService, true);
+    }
+
+    /**
+     * Implementation of AWS Signature Version 4
+     * @see https://docs.aws.amazon.com/general/latest/gr/sigv4_signing.html
+     * @param string $amz_datetime
+     * @param string $query
+     * @return string
+     */
+    private function __getAuthHeaderV4($amz_datetime, $query) {
+        $amz_date = substr($amz_datetime, 0, 8);
+        $algo = 'sha256';
+        $aws_algo = 'AWS4-HMAC-' . strtoupper($algo);
+
+        $host_parts = explode('.', $this->ses->getHost());
+        $service = $host_parts[0];
+        $region = $host_parts[1];
+
+        $canonical_uri = '/';
+        if($this->verb === 'POST') {
+            $canonical_querystring = '';
+            $payload_data = $query;
+        } else {
+            $canonical_querystring = $query;
+            $payload_data = '';
+        }
+
+        // ************* TASK 1: CREATE A CANONICAL REQUEST *************
+        $canonical_headers_list = [
+            'host:' . $this->ses->getHost(),
+            'x-amz-date:' . $amz_datetime
+        ];
+
+        $canonical_headers = implode("\n", $canonical_headers_list) . "\n";
+        $signed_headers = 'host;x-amz-date';
+        $payload_hash = hash($algo, $payload_data, false);
+
+        $canonical_request = implode("\n", array(
+            $this->verb,
+            $canonical_uri,
+            $canonical_querystring,
+            $canonical_headers,
+            $signed_headers,
+            $payload_hash
+        ));
+
+        // ************* TASK 2: CREATE THE STRING TO SIGN*************
+        $credential_scope = $amz_date. '/' . $region . '/' . $service . '/' . 'aws4_request';
+        $string_to_sign = implode("\n", array(
+            $aws_algo,
+            $amz_datetime,
+            $credential_scope,
+            hash($algo, $canonical_request, false)
+        ));
+
+        // ************* TASK 3: CALCULATE THE SIGNATURE *************
+        // Create the signing key using the function defined above.
+        $signing_key = $this->__getSigningKey($this->ses->getSecretKey(), $amz_date, $region, $service, $algo);
+
+        // Sign the string_to_sign using the signing_key
+        $signature = hash_hmac($algo, $string_to_sign, $signing_key, false);
+
+        // ************* TASK 4: ADD SIGNING INFORMATION TO THE REQUEST *************
+        return $aws_algo . ' ' . implode(', ', array(
+                'Credential=' . $this->ses->getAccessKey() . '/' . $credential_scope,
+                'SignedHeaders=' . $signed_headers ,
+                'Signature=' . $signature
+            ));
+    }
 }

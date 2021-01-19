@@ -1,5 +1,7 @@
 **Amazon Simple Email Service provides a simple way to send e-mails without having to maintain your own mail server.  Those PHP classes use the REST-based interface to that service.**
 
+*Version 4 is now supported by default.*
+
 
 ****
 
@@ -180,6 +182,10 @@ $ses->sendEmail($m, $use_raw_request, $trigger_error);
 
 
 ### Changelog
+v.1.0.5.
+
+ - Signature v4
+
 v.1.0.0.
 
  - Inital impport
