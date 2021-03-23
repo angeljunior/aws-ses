@@ -4,7 +4,7 @@
 *
 * @link https://github.com/angeljunior/aws-ses
 * @package AmazonSimpleEmailService
-* @version v1.0.5
+* @version v1.1.0
 */
 final class SimpleEmailServiceMessage {
 

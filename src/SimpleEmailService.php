@@ -5,35 +5,45 @@
 *
 * @link https://github.com/angeljunior/aws-ses
 * @package AmazonSimpleEmailService
-* @version v1.0.5
+* @version v1.1.0
 */
 class SimpleEmailService
 {
 	/**
 	 * @link(AWS SES regions, https://docs.aws.amazon.com/general/latest/gr/ses.html)
 	 */
-	const AWS_CA_CENTRAL_1 = 'email.ca-central-1.amazonaws.com';
-	const AWS_AP_NORTHEAST_1 = 'email.ap-northeast-1.amazonaws.com';
-	const AWS_AP_NORTHEAST_2 = 'email.ap-northeast-2.amazonaws.com';
-	const AWS_AP_SOUTH_1 = 'email.ap-south-1.amazonaws.com';
-	const AWS_AP_SOUTHEAST_1 = 'email.ap-southeast-1.amazonaws.com';
-	const AWS_AP_SOUTHEAST_2 = 'email.ap-southeast-2.amazonaws.com';
-	const AWS_EU_CENTRAL_1 = 'email.eu-central-1.amazonaws.com';
-	const AWS_EU_WEST_1 = 'email.eu-west-1.amazonaws.com';
-	const AWS_EU_WEST_2 = 'email.eu-west-2.amazonaws.com';
-	const AWS_SA_EAST_1 = 'email.sa-east-1.amazonaws.com';
-	const AWS_US_EAST_1 = 'email.us-east-1.amazonaws.com';
-	const AWS_US_EAST_2 = 'email.us-east-2.amazonaws.com';
-	const AWS_US_GOV_WEST_1 = 'email.us-gov-west-1.amazonaws.com';
-	const AWS_US_WEST_2 = 'email.us-west-2.amazonaws.com';
-	
-	/**
-	 * Deprecated, available for backward compatibility
-	 */
-	const AWS_EU_WEST1 = 'email.eu-west-1.amazonaws.com';
+	const AWS_US_EAST_2 		= 'email.us-east-2.amazonaws.com';
+	const AWS_US_EAST_1 		= 'email.us-east-1.amazonaws.com';
+	const AWS_US_WEST_1 		= 'email.us-west-1.amazonaws.com';
+	const AWS_US_WEST_2 		= 'email.us-west-2.amazonaws.com';
 
-	const REQUEST_SIGNATURE_V3 = 'v4';  // For BW compatibility reasons.
+	const AWS_AP_SOUTH_1 		= 'email.ap-south-1.amazonaws.com';
+	const AWS_AP_NORTHEAST_2 	= 'email.ap-northeast-2.amazonaws.com';
+	const AWS_AP_SOUTHEAST_1 	= 'email.ap-southeast-1.amazonaws.com';
+	const AWS_AP_SOUTHEAST_2 	= 'email.ap-southeast-2.amazonaws.com';
+	const AWS_AP_NORTHEAST_1 	= 'email.ap-northeast-1.amazonaws.com';
+
+	const AWS_CA_CENTRAL_1 		= 'email.ca-central-1.amazonaws.com';
+	
+	const AWS_EU_CENTRAL_1 		= 'email.eu-central-1.amazonaws.com';
+	const AWS_EU_WEST_1 		= 'email.eu-west-1.amazonaws.com';
+	const AWS_EU_WEST_2 		= 'email.eu-west-2.amazonaws.com';
+	const AWS_EU_WEST_3 		= 'email.eu-west-3.amazonaws.com';
+	const AWS_EU_NORTH_1 		= 'email.eu-north-1.amazonaws.com';
+
+	const AWS_ME_SOUTH_1 		= 'email.me-south-1.amazonaws.com';
+
+	const AWS_SA_EAST_1 		= 'email.sa-east-1.amazonaws.com';
+
+	const AWS_US_GOV_WEST_1 	= 'email.us-gov-west-1.amazonaws.com';
+
+
+
+	/**
+	 * AWS SES Signature format
+	 */
 	const REQUEST_SIGNATURE_V4 = 'v4';
+	const REQUEST_SIGNATURE_V3 = 'v4';
 
 	/**
 	 * AWS SES Target host of region
