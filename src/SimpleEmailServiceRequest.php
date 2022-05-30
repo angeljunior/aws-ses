@@ -232,8 +232,7 @@ class SimpleEmailServiceRequest
 	* @param string $data Data
 	* @return integer
 	*/
-	private function __responseWriteCallback($curl, &$data) {
-		
+	private function __responseWriteCallback($curl, $data) {
 		if (!isset($this->response->body)) {
 			$this->response->body = $data;
 		} else {
